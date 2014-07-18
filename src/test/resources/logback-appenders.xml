@@ -27,6 +27,7 @@
 		<remoteHost>localhost</remoteHost>
 		<port>24224</port>
 		<maxQueueSize>20</maxQueueSize>
+        <hostname>rbcabc123</hostname>
 	</appender>
 
 	<appender name="FLUENT_TEXT"

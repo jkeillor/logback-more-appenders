@@ -46,16 +46,18 @@ public class DataFluentAppender extends UnsynchronizedAppenderBase<ILoggingEvent
 		private final String label;
 		private final String remoteHost;
 		private final int port;
+        private final String hostname;
 		private final Layout<ILoggingEvent> layout;
 		
 		FluentDaemonAppender(String tag, String label, String remoteHost,
-				int port, Layout<ILoggingEvent> layout, int maxQueueSize) {
+				int port, Layout<ILoggingEvent> layout, int maxQueueSize, String hostname) {
 			super(maxQueueSize);
 			this.tag =tag;
 			this.label = label;
 			this.remoteHost = remoteHost;
 			this.port = port;
 			this.layout = layout;
+            this.hostname = hostname;
 		}
 
 		@Override
@@ -76,7 +78,14 @@ public class DataFluentAppender extends UnsynchronizedAppenderBase<ILoggingEvent
 		@Override
 		protected void append(ILoggingEvent rawData) {
 			final Map<String, Object> data = new HashMap<String, Object>();
-			data.put("message", rawData.getFormattedMessage());
+            if( layout != null ) {
+                data.put("message", layout.doLayout(rawData));
+            } else {
+                data.put("message", rawData.getFormattedMessage());
+            }
+            if( hostname != null ) {
+                data.put("hostname", hostname);
+            }
 			data.put("logger", rawData.getLoggerName());
 			data.put("thread", rawData.getThreadName());
 			data.put("level", rawData.getLevel());
@@ -104,7 +113,7 @@ public class DataFluentAppender extends UnsynchronizedAppenderBase<ILoggingEvent
 	@Override
 	public void start() {
 		super.start();
-		appender = new FluentDaemonAppender(tag, label, remoteHost, port, layout, maxQueueSize);
+		appender = new FluentDaemonAppender(tag, label, remoteHost, port, layout, maxQueueSize, hostname);
 	}
 
 	@Override
@@ -127,6 +136,7 @@ public class DataFluentAppender extends UnsynchronizedAppenderBase<ILoggingEvent
 	private String label;
 	private String remoteHost;
 	private int port;
+    private String hostname;
 	private Layout<ILoggingEvent> layout;
 	
 	public String getTag() {
@@ -136,6 +146,13 @@ public class DataFluentAppender extends UnsynchronizedAppenderBase<ILoggingEvent
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+    public String getHostname() {
+        return hostname;
+    }
 
 	public String getLabel() {
 		return label;
